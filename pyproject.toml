@@ -1,0 +1,44 @@
+[project]
+name = "philomena"
+version = "0.1.0"
+description = "A baby monitor: one phone is the camera, the others watch over WebRTC"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "litewriter>=0.3.2,<0.4",
+    "pywebpush>=2.5.0,<3",
+    "segno>=1.6.6,<2",
+    "stario>=5.6.0,<6",
+]
+
+[dependency-groups]
+dev = [
+    "pyrefly>=1.4",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1",
+    "ruff>=0.17.3",
+    "watchfiles>=1.3.0",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+src = ["app", "tests"]
+extend-exclude = [".agents", ".claude", ".cursor"]
+
+[tool.ruff.lint]
+ignore = ["E501"]  # ruff format owns the line length
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.pyrefly]
+python-version = "3.14"
+project-includes = ["app", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

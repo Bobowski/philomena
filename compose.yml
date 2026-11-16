@@ -1,0 +1,60 @@
+services:
+  app:
+    build:
+      context: ${CHECKOUT}
+      dockerfile: Containerfile
+    image: ${IMAGE}
+    pull_policy: never
+    restart: always
+    networks:
+      yard:
+        aliases:
+          - ${PROJECT_NAME}
+    env_file:
+      - ${APP_ENV}
+    volumes:
+      - "${DATA_DIR}:/data"
+    expose:
+      - "8000"
+    environment:
+      PROJECT_NAME: ${PROJECT_NAME}
+      PROJECT_DATA_DIR: /data
+      SHA: ${SHA}
+      STARIO_HOST: 0.0.0.0
+      STARIO_PORT: "8000"
+      STARIO_TRACER: json
+      PORT: "8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')
+      interval: 10s
+      timeout: 3s
+      start_period: 30s
+
+  # TURN on the host network: Caddy cannot proxy UDP, and rootless Podman
+  # port publishing is wrong for a UDP relay range. The media is still
+  # end-to-end DTLS-SRTP; TURN sees only ciphertext.
+  turn:
+    image: docker.io/coturn/coturn:4.18.0
+    restart: always
+    network_mode: host
+    env_file:
+      - ${APP_ENV}
+    volumes:
+      - ${CHECKOUT}/coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+    # $${VAR} stays ${VAR} in compose; the coturn entrypoint expands it from env_file.
+    command:
+      - "-c"
+      - "/etc/coturn/turnserver.conf"
+      - "--static-auth-secret=$${COTURN_STATIC_AUTH_SECRET}"
+      - "--listening-ip=$${TURN_PUBLIC_IP}"
+      - "--relay-ip=$${TURN_PUBLIC_IP}"
+      - "--external-ip=$${TURN_PUBLIC_IP}"
+
+networks:
+  yard:
+    external: true
+    name: yard

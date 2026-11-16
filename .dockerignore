@@ -21,3 +21,4 @@ tailwindcss
 *.sqlite3*
 *.db
 .DS_Store
+docs/

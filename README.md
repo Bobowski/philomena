@@ -2,6 +2,15 @@
 
 A baby monitor from two phones. One phone stays with the baby and is the camera. Other phones and laptops watch it in the browser. Nobody installs an app.
 
+![Two phones: the camera by the crib shows a code, the other phone scans it and watches. At night a cry wakes the watching phone, and one tap shows the picture.](docs/philomena.gif)
+
+How it is used:
+
+1. The phone by the crib opens the site and taps "Stays with the baby". It shows a QR code and a 6-digit code.
+2. Your phone scans the code. The camera phone taps "Allow". The next night, the two phones find each other again.
+3. The app stays dark at night. The camera phone listens, and your phone shows one word: "Calm", "Stirring", or "Crying".
+4. A cry wakes your phone with a notification, even when it is locked. One tap shows the picture.
+
 Philomena is meant to be self-hosted. You run it on your own server, under your own domain. This guide uses `monitor.example.com` for the domain and `203.0.113.10` for the server's public IP address. Put your own values in their place.
 
 ## How it works
@@ -88,11 +97,13 @@ The app offers TURN only when `TURN_URLS` and `COTURN_STATIC_AUTH_SECRET` are bo
 
    ```sh
    curl https://monitor.example.com/health    # 200
-   yard app status philomena
+   yard app status --app philomena
    yard logs philomena-turn-1                 # the coturn log
    ```
 
-**Updates:** push to `main`. Yard deploys each push. Change a setting with `yard env set KEY=VALUE --app philomena`, then deploy again.
+Yard names the app after the repo. If your repo has another name, use that name in place of `philomena`.
+
+**Updates:** push to `main`. Yard deploys each push. Change a setting with `yard env set KEY=VALUE --app philomena`. Yard keeps the old settings until the next deploy, so then run `yard app deploy --app philomena`.
 
 ## Deploy with Docker Compose or Podman Compose
 
@@ -138,9 +149,11 @@ You can run the same `compose.yml` without Yard. Yard fills a few variables in i
    docker compose --env-file compose.env up -d --build
    ```
 
-   The service file names the network `yard`, so the network must exist. The name has no other meaning.
+   The service file names the network `yard`, so the network must exist. The name has no other meaning. With Podman, use `podman network create yard` and `podman compose`.
 
-7. **Put Caddy in front.** Install Caddy on the server, and use this `Caddyfile`:
+7. **Check** it: `curl http://127.0.0.1:8000/health` returns 200, and `docker compose --env-file compose.env logs turn` shows `Relay ports initialization done`.
+
+8. **Put Caddy in front.** Install Caddy on the server, and use this `Caddyfile`:
 
    ```text
    monitor.example.com {
@@ -164,7 +177,7 @@ Back up the data directory (`/data` in the container). With Yard, the directory 
 - `just dev`: run with reload on `http://localhost:8000`. A phone on your LAN gets no camera or microphone over plain HTTP. Use a laptop browser, or a tunnel with HTTPS.
 - `just check`: lint, types, and tests.
 - `just css`: build the stylesheet with the standalone `./tailwindcss`.
-- `uv run --with playwright python scripts/e2e.py`: the browser check with a fake camera and microphone. It saves screenshots to `/tmp/philomena-shots/`.
+- `uv run --with playwright python scripts/e2e.py`: the browser check with a fake camera and microphone. It saves screenshots to `/tmp/philomena-shots/`. Before the first run, install its browser: `uv run --with playwright playwright install chromium`.
 
 ## Test on two real phones
 

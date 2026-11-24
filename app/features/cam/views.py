@@ -222,7 +222,7 @@ def render(
             },
             classes("relative", "h-dvh", "w-full", "overflow-hidden", "bg-ground"),
             data.ref("_camroot"),
-            data.on("pagehide", "app.rtc.timeline?.flush()", target="window"),
+            data.on("pagehide", "app.rtc.timeline?.flush()", window=True),
             data.signals(
                 {
                     "tab": tab,
@@ -264,7 +264,7 @@ def render(
                 " el.night ??= app.night(el, v => $_dim = v, s => $_dim_in = s)"
             ),
             data.effect("el.night && el.night.viewers($_viewers)"),
-            data.on("visibilitychange", "app.wake.visible()", target="document"),
+            data.on("visibilitychange", "app.wake.visible()", document=True),
             h.Video(
                 {
                     "data-rtc": "preview",

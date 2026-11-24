@@ -68,7 +68,7 @@ def page(title: str, og_image: str, body: HtmlElement) -> HtmlElement:
             data.on(
                 "beforeinstallprompt",
                 "app.install.capture(evt, v => $_installable = v)",
-                target="window",
+                window=True,
             ),
             body,
             h.Div(

@@ -501,7 +501,7 @@ def render(
                 " document.visibilityState === 'hidden'"
                 " ? app.sound.hidden()"
                 " : app.sound.visible()",
-                target="document",
+                document=True,
             ),
             # the picture: the whole screen in the picture view, a strip in the glance view
             h.Div(
